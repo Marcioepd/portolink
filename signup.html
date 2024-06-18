@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Conta PortoLink</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        .dark-mode {
+            background-color: #121212;
+            color: #ffffff;
+        }
+        .dark-mode .form-control {
+            background-color: #333333;
+            color: #ffffff;
+        }
+        .dark-mode .btn {
+            background-color: #444444;
+            color: #ffffff;
+        }
+        .dark-mode .fa-moon {
+            color: #ffd700;
+        }
+        .dark-mode .fa-sun {
+            color: #f0e68c;
+        }
+        .theme-toggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            font-size: 1.5em;
+        }
+        .alert {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="theme-toggle">
+        <i id="themeIcon" class="fas"></i>
+    </div>
+    <div class="container">
+        <div class="row justify-content-center mt-5">
+            <div class="col-md-6">
+                <h1 class="text-center">Criar Conta</h1>
+                <div class="alert alert-success" id="successAlert">Conta criada com sucesso! Faça o login.</div>
+                <form id="signupForm" class="mt-4">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" class="form-control" id="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="username">Nome de Usuário</label>
+                        <input type="text" class="form-control" id="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Senha</label>
+                        <input type="password" class="form-control" id="password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="profilePic">Foto de Perfil</label>
+                        <input type="file" class="form-control" id="profilePic">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Criar Conta</button>
+                    <small id="error" class="form-text text-danger text-center mt-2"></small>
+                    <div class="text-center mt-3">
+                        <a href="index.html">Voltar para Login</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeIcon = document.getElementById('themeIcon');
+            if (localStorage.getItem('darkMode') === 'enabled') {
+                document.body.classList.add('dark-mode');
+                themeIcon.classList.add('fa-sun');
+            } else {
+                themeIcon.classList.add('fa-moon');
+            }
+
+            themeIcon.addEventListener('click', toggleDarkMode);
+
+            function toggleDarkMode() {
+                document.body.classList.toggle('dark-mode');
+                if (document.body.classList.contains('dark-mode')) {
+                    localStorage.setItem('darkMode', 'enabled');
+                    themeIcon.classList.remove('fa-moon');
+                    themeIcon.classList.add('fa-sun');
+                } else {
+                    localStorage.setItem('darkMode', 'disabled');
+                    themeIcon.classList.remove('fa-sun');
+                    themeIcon.classList.add('fa-moon');
+                }
+            }
+        });
+
+        const users = JSON.parse(localStorage.getItem('users')) || [];
+
+        document.getElementById('signupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const profilePicInput = document.getElementById('profilePic');
+            let profilePic = '';
+
+            if (profilePicInput.files.length > 0) {
+                // Se uma imagem foi carregada
+                const reader = new FileReader();
+                reader.onloadend = function() {
+                    profilePic = reader.result;
+                    createUser(email, username, password, profilePic);
+                };
+                reader.readAsDataURL(profilePicInput.files[0]);
+            } else {
+                // Caso contrário, use a imagem padrão
+                profilePic = 'default_profile_pic.jpg';
+                createUser(email, username, password, profilePic);
+            }
+        });
+
+        function createUser(email, username, password, profilePic) {
+            if (users.find(user => user.username === username)) {
+                document.getElementById('error').innerText = 'Nome de usuário já existe!';
+                return;
+            }
+
+            const user = { email, username, password, profilePic };
+            users.push(user);
+            localStorage.setItem('users', JSON.stringify(users));
+            document.getElementById('successAlert').style.display = 'block';
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
